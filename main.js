@@ -39,25 +39,36 @@
     "left", "right", "upleft", "upright", "downleft", "downright"
   ];
   
-  function randomDirection() {
-    function random(min, max) {
-      return Math.floor(Math.random() * (max - min + 1) + min);
-    }
-    return directions[random(0, 5)];
+  function random(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
   }
+  
+  Array.prototype.randomElement = function () {
+    return this[random(0, this.length)];
+  };
   
   var circles = []
     , prisoner = null
     ;
   
   function decision() {
-    var direction = randomDirection();
-    if (prisoner[direction] == null) {
-      alert("You lose!");
+    var adjacent = [];
+    for (var i = 0; i < directions.length; i++) {
+      var direction = directions[i];
+      if (prisoner[direction] === null) {
+        alert("You lost!");
+        return;
+      }
+      if (prisoner[direction].status === "empty")
+        adjacent.push(prisoner[direction]);
+    }
+    if (adjacent.length === 0) {
+      alert("You win!");
     } else {
+      var next = adjacent.randomElement();
+      next.changeStatus("prisoner");
       prisoner.changeStatus("empty");
-      prisoner = prisoner[direction];
-      prisoner.changeStatus("prisoner");
+      prisoner = next;
     }
   }
   
@@ -86,9 +97,10 @@
       graphics.mousedown = function (data) {
         if (self.status === "empty") {
           this.changeColor(Color.WALL);
+          self.status = "wall";
+          render();
           decision();
           render();
-          self.status = "wall";
         }
       };
       
