@@ -13,6 +13,11 @@
     , COL = WIDTH / D - 1
     ;
   
+  // Helper functions
+  Array.prototype.randomElement = function () {
+    return this[_.random(0, this.length)];
+  };
+  
   // Initialize renderer
   
   var renderOptions = {
@@ -26,6 +31,10 @@
   // Create game stage
   
   var stage = new PIXI.Container();
+  
+  function renderStage() {
+    renderer.render(stage);
+  }
   
   // Create cell map
   
@@ -42,6 +51,10 @@
   }
   
   // Generate relations
+  
+  var directions = [
+    "left", "right", "upleft", "upright", "downleft", "downright"
+  ];
   
   for (var i = 0; i < ROW; i++) {
     for (var j = 0; j < COL; j++) {
@@ -62,25 +75,32 @@
         c.downleft = null;
         c.downright = null;
       }
+      c.adjacent = _.map(directions, function (x) {
+        return c[x];
+      });
     }
   }
   
   // The prisoner
   
   var prisoner = cells[Math.floor(ROW / 2)][Math.floor(COL / 2)];
+  prisoner.transform("prisoner");
   
   // Strategy
   
-  var directions = [
-    "left", "right", "upleft", "upright", "downleft", "downright"
-  ];
-  
   function decision() {
-    var adjacent = directions.map(function (x) {
-      return prisoner[x];
-    });
     // Check if on border
-    if 
+    if (_.some(prisoner.adjacent, function (x) {return x === null;})) {
+      alert("You lost!");
+      return;
+    }
+    // Find available direction
+    var ds = _.filter(prisoner.adjacent, function (x) {
+      return x && x.status !== "empty";
+    });
+    prisoner.transform("empty");
+    prisoner = ds.randomElement();
+    prisoner.transform("prisoner");
   }
   
   // Cell class
@@ -113,16 +133,21 @@
       graphics.endFill();
     }
     
+    // Transform
+    function transform(status) {
+      changeColor(status);
+      this.status = status;
+    }
+    
     // Mouse down event
     graphics.mousedown = function (data) {
       if (self.status === "empty") {
         // Place wall
-        self.status = "wall";
-        changeColor("wall");
+        transform("wall");
         // Decision
         decision();
         // Re-render
-        renderer.render(stage);
+        renderStage();
       } else if (self.status === "prisoner") {
         alert("You cannot hit me!");
       } else if (self.status === "wall") {
@@ -134,10 +159,9 @@
     this.col = col;
     this.status = status;
     this.graphics = graphics;
-    this.transform = function (status) {
-      changeColor(status);
-      this.status = status;
-    };
+    this.transform = transform;
   }
+  
+  renderStage();
   
 });
