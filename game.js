@@ -1,5 +1,5 @@
 
-(function () {
+(function newGame () {
   
   // Constant definition
   
@@ -61,20 +61,40 @@
       var c = cells[i][j];
       c.left = j > 0 ? cells[i][j - 1] : null;
       c.right = j + 1 < COL ? cells[i][j + 1] : null;
-      if (i > 0) {
-        c.upleft = cells[i - 1][j];
-        c.upright = j + 1 < COL ? cells[i - 1][j + 1] : null;
-      } else {
-        c.upleft = null;
-        c.upright = null;
+      
+      // Odd line
+      if (i % 2 === 0) {
+        if (i > 0) {
+          c.upleft = j - 1 > 0 ? cells[i - 1][j - 1] : null;
+          c.upright = cells[i - 1][j];
+        } else {
+          c.upleft = null;
+          c.upright = null;
+        }
+        if (i + 1 < ROW) {
+          c.downleft = j - 1 > 0 ? cells[i + 1][j - 1] : null;
+          c.downright = cells[i + 1][j];
+        } else {
+          c.downleft = null;
+          c.downright = null;
+        }
+      } else { // Even line
+        if (i > 0) { // Not the first line
+          c.upleft = cells[i - 1][j];
+          c.upright = j + 1 < COL ? cells[i - 1][j + 1] : null;
+        } else {
+          c.upleft = null;
+          c.upright = null;
+        }
+        if (i + 1 < ROW) {// Not the last line
+          c.downleft = cells[i + 1][j];
+          c.downright = j + 1 < COL ? cells[i + 1][j + 1] : null;
+        } else {
+          c.downleft = null;
+          c.downright = null;
+        }
       }
-      if (i + 1 < ROW) {
-        c.downleft = cells[i + 1][j];
-        c.downright = j + 1 < COL ? cells[i + 1][j + 1] : null;
-      } else {
-        c.downleft = null;
-        c.downright = null;
-      }
+      
       c.adjacent = _.map(directions, function (x) {
         return c[x];
       });
