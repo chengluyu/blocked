@@ -15,7 +15,7 @@
   
   // Helper functions
   Array.prototype.randomElement = function () {
-    return this[_.random(0, this.length)];
+    return this[_.random(0, this.length - 1)];
   };
   
   // Initialize renderer
@@ -45,7 +45,7 @@
     for (var j = 0; j < COL; j++) {
       var cell = new Cell(i, j);
       stage.addChild(cell.graphics);
-      line.push(circle);
+      line.push(cell);
     }
     cells.push(line);
   }
@@ -96,11 +96,18 @@
     }
     // Find available direction
     var ds = _.filter(prisoner.adjacent, function (x) {
-      return x && x.status !== "empty";
+      return x && x.status === "empty";
     });
-    prisoner.transform("empty");
-    prisoner = ds.randomElement();
-    prisoner.transform("prisoner");
+    if (ds.length === 0) {
+      alert("You win!");
+    } else {
+      prisoner.transform("empty");
+      var next = ds.randomElement();
+      if (next === undefined)
+        debugger;
+      prisoner = next;
+      prisoner.transform("prisoner");
+    }
   }
   
   // Cell class
@@ -136,7 +143,7 @@
     // Transform
     function transform(status) {
       changeColor(status);
-      this.status = status;
+      self.status = status;
     }
     
     // Mouse down event
@@ -155,13 +162,15 @@
       }
     };
     
+    // Make self empty
+    transform("empty");
+    
     this.row = row;
     this.col = col;
-    this.status = status;
     this.graphics = graphics;
     this.transform = transform;
   }
   
   renderStage();
   
-});
+})();
