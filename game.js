@@ -65,14 +65,14 @@
       // Odd line
       if (i % 2 === 0) {
         if (i > 0) {
-          c.upleft = j - 1 > 0 ? cells[i - 1][j - 1] : null;
+          c.upleft = j - 1 >= 0 ? cells[i - 1][j - 1] : null;
           c.upright = cells[i - 1][j];
         } else {
           c.upleft = null;
           c.upright = null;
         }
         if (i + 1 < ROW) {
-          c.downleft = j - 1 > 0 ? cells[i + 1][j - 1] : null;
+          c.downleft = j - 1 >= 0 ? cells[i + 1][j - 1] : null;
           c.downright = cells[i + 1][j];
         } else {
           c.downleft = null;
@@ -108,7 +108,39 @@
   
   // Strategy
   
+  var visitedCycle = 0;
+  
+  function computerLose() {
+    visitedCycle += 1;
+    
+    var q = [];
+    q.push(prisoner);
+    
+    while (q.length > 0) {
+      var u = q.shift()
+        , found = false;
+        ;
+      _.map(directions, function (d) {
+        var v = u[d];
+        if (v === null) {
+          found = true;
+        } else if (v.visited !== visitedCycle && v.status === "empty") {
+          q.push(v);
+          v.visited = visitedCycle;
+        }
+      });
+      if (found) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
   function decision() {
+    if (computerLose()) {
+      alert("You win!");
+      return;
+    }
     // Check if on border
     if (_.some(prisoner.adjacent, function (x) {return x === null;})) {
       alert("You lost!");
@@ -189,6 +221,8 @@
     this.col = col;
     this.graphics = graphics;
     this.transform = transform;
+    this.visited = visitedCycle;
+    this.factor = 1.0;
   }
   
   renderStage();
